@@ -21,3 +21,15 @@
 #define BSP_DSI_LDO_CHAN       3
 #define BSP_DSI_LDO_VOLTAGE_MV 2500
 #define BSP_LCD_RESET_PIN      17  // Note: low for normal operation, high for reset
+
+// Audio pins
+#define BSP_I2S_MCLK  I2S_GPIO_UNUSED
+#define BSP_I2S_BCLK  26  // MAX BCLK
+#define BSP_I2S_DOUT  27   // MAX DIN
+#if defined CONFIG_BSP_WHY2025_AUDIOREMAPED
+#define BSP_I2S_WS    38   // MAX LRCLK or 37
+#define BSP_AMP_SHDW  37 // MAX AMP PIN
+#else
+#define BSP_I2S_WS    24   // MAX LRCLK or 37
+#define BSP_AMP_SHDW  25 // MAX AMP PIN
+#endif
