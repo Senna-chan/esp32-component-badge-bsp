@@ -94,7 +94,9 @@ typedef enum {
     WHY2025_KEY_SUPER     = 62,
     WHY2025_KEY_LEFT_ALT  = 63,
     WHY2025_KEY_BACKSLASH = 64,
-    WHY2025_KEY_SPACE     = 65,
+    WHY2025_KEY_SPACE_L     = 65,
+    WHY2025_KEY_SPACE_M     = 66,
+    WHY2025_KEY_SPACE_R     = 67,
     WHY2025_KEY_RIGHT_ALT = 68,
     WHY2025_KEY_P         = 69,
     WHY2025_KEY_LEFT_BRACKET = 70,
@@ -196,7 +198,6 @@ static void tca8418_key_callback(tca8418_handle_t* handle) {
         if (tca8418_get_key_event_a(handle, &pressed, &code) != ESP_OK || code == 0) {
             break;
         }
-        ESP_DRAM_LOGI(TAG, "key event %d\r\n", code);
         WHY2025_keys_t key = (WHY2025_keys_t)code;
 
         if (key != WHY2025_KEY_SUPER) {
@@ -397,9 +398,12 @@ static void tca8418_key_callback(tca8418_handle_t* handle) {
                 send_scancode_event(BSP_INPUT_SCANCODE_BACKSLASH, pressed);
                 if(pressed) handle_keyboard_text_entry('\\', '|', "\\", "|", "̇", "̌", active_modifiers);
                 break;
-            case WHY2025_KEY_SPACE:
+            case WHY2025_KEY_SPACE_L:
+            case WHY2025_KEY_SPACE_M:
+            case WHY2025_KEY_SPACE_R:
                 send_scancode_event(BSP_INPUT_SCANCODE_SPACE, pressed);
                 send_navigation_event(BSP_INPUT_NAVIGATION_KEY_SPACE_M, pressed, active_modifiers);
+                if (pressed) handle_keyboard_text_entry(' ', ' ', " ", " ", " ", " ", active_modifiers);
                 break;
             case WHY2025_KEY_RIGHT:
                 send_scancode_event(BSP_INPUT_SCANCODE_ESCAPED_GREY_RIGHT, pressed);
@@ -422,7 +426,7 @@ static void tca8418_key_callback(tca8418_handle_t* handle) {
                 }
                 break;
             case WHY2025_KEY_NUM_MINUS:
-                send_scancode_event(BSP_INPUT_SCANCODE_KPMINUS, pressed);
+                send_scancode_event(BSP_INPUT_SCANCODE_MINUS, pressed);
                 if(pressed) handle_keyboard_text_entry('-', '_', "-", "_", "¥", "̣", active_modifiers);
                 break;
             case WHY2025_KEY_GRAVE:
@@ -489,7 +493,7 @@ static void tca8418_key_callback(tca8418_handle_t* handle) {
                 if(pressed) handle_keyboard_text_entry('/', '?', ";", "?", "̨", "̈", active_modifiers);
                 break;
             case WHY2025_KEY_NUM_0:
-                send_scancode_event(BSP_INPUT_SCANCODE_KP0, pressed);
+                send_scancode_event(BSP_INPUT_SCANCODE_0, pressed);
                 if(pressed) handle_keyboard_text_entry('0', ')', "0", ")", "’", "̊", active_modifiers);
                 break;
             case WHY2025_KEY_RIGHT_SHIFT:
@@ -505,7 +509,7 @@ static void tca8418_key_callback(tca8418_handle_t* handle) {
                 send_navigation_event(BSP_INPUT_NAVIGATION_KEY_UP, pressed, active_modifiers);
                 break;
             case WHY2025_KEY_BACKSPACE:
-                send_scancode_event(BSP_INPUT_SCANCODE_BACKSLASH, pressed);
+                send_scancode_event(BSP_INPUT_SCANCODE_BACKSPACE, pressed);
                 send_navigation_event(BSP_INPUT_NAVIGATION_KEY_BACKSPACE, pressed, active_modifiers);
                 break;
             default:
@@ -550,7 +554,7 @@ esp_err_t bsp_input_initialize(void) {
         event_queue = xQueueCreate(32, sizeof(bsp_input_event_t));
         ESP_RETURN_ON_FALSE(event_queue, ESP_ERR_NO_MEM, TAG, "Failed to create input event queue");
     }
-
+    gpio_set_direction(SD_CD, GPIO_MODE_OUTPUT);
     bsp_i2c_primary_bus_get_handle(&i2c_handle);
     return why_keyboard_reset_and_init();
 }
@@ -587,5 +591,9 @@ esp_err_t bsp_input_read_scancode(bsp_input_scancode_t key, bool* out_state) {
 }
 
 esp_err_t bsp_input_read_action(bsp_input_action_type_t action, bool* out_state) {
+    if (action == BSP_INPUT_ACTION_TYPE_SD_CARD) {
+        *out_state = !gpio_get_level(SD_CD);
+        return ESP_OK;
+    }
     return ESP_ERR_NOT_SUPPORTED;
 }

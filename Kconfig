@@ -40,4 +40,18 @@ menu "Badge.Team BSP"
 			bool "WHY2025 badge"
 
 	endchoice
+	menu "WHY2025"
+        depends on BSP_TARGET_WHY2025
+	    config BSP_WHY2025_AUDIOREMAPED
+            bool "Enable AUDIO remap"
+            default n
+            help
+                Change the default audio pins from the M2 module to the new ones with the JTAG mode
+
+        config BSP_WHY2025_JTAG
+            bool "Enable JTAG support"
+            default n
+            help
+                By default the JTAG pins are used for I2S. However with a mod the JTAG pins are usable
+    endmenu
 endmenu

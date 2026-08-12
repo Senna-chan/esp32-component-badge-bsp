@@ -30,6 +30,9 @@
 #define BSP_I2S_WS    38   // MAX LRCLK or 37
 #define BSP_AMP_SHDW  37 // MAX AMP PIN
 #else
-#define BSP_I2S_WS    24   // MAX LRCLK or 37
-#define BSP_AMP_SHDW  25 // MAX AMP PIN
+#define BSP_I2S_WS    25   // MAX LRCLK or 37
+#define BSP_AMP_SHDW  24 // MAX AMP PIN
 #endif
+
+// SDCard
+#define SD_CD 46
